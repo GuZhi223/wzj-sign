@@ -1,5 +1,6 @@
 package com.wzj.sign;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,14 +66,20 @@ public class AccountBottomSheet extends BottomSheetDialogFragment {
 
         binding.btnSave.setOnClickListener(v -> {
             String uin = binding.etUin.getText() != null ? binding.etUin.getText().toString().trim() : "";
-            String openid = binding.etOpenid.getText() != null ? binding.etOpenid.getText().toString().trim() : "";
+            String openidInput = binding.etOpenid.getText() != null ? binding.etOpenid.getText().toString().trim() : "";
 
             if (uin.isEmpty()) {
-                binding.etUin.setError("请输入QQ号");
+                binding.etUin.setError("请输入备注");
                 return;
             }
-            if (openid.isEmpty()) {
-                binding.etOpenid.setError("请输入OpenID");
+            if (openidInput.isEmpty()) {
+                binding.etOpenid.setError("请输入OpenID或粘贴微助教网址");
+                return;
+            }
+
+            String openid = extractOpenid(openidInput);
+            if (openid == null) {
+                binding.etOpenid.setError("无法识别OpenID，请检查输入");
                 return;
             }
 
@@ -81,6 +88,28 @@ public class AccountBottomSheet extends BottomSheetDialogFragment {
             }
             dismiss();
         });
+    }
+
+    private String extractOpenid(String input) {
+        if (input == null || input.isEmpty()) return null;
+
+        if (input.startsWith("http")) {
+            try {
+                Uri uri = Uri.parse(input);
+                String openid = uri.getQueryParameter("openid");
+                if (openid != null && !openid.isEmpty()) {
+                    return openid;
+                }
+            } catch (Exception ignored) {
+            }
+            return null;
+        }
+
+        if (input.matches("[a-f0-9]{32}")) {
+            return input;
+        }
+
+        return null;
     }
 
     @Override

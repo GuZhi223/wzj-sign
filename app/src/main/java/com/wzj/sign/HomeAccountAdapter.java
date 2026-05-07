@@ -98,9 +98,9 @@ public class HomeAccountAdapter extends RecyclerView.Adapter<HomeAccountAdapter.
         void bind(Account account) {
             String uin = account.getUin();
             if (uin == null || uin.isEmpty()) {
-                binding.tvUin.setText("未填写UIN");
+                binding.tvUin.setText("未填写备注");
             } else {
-                binding.tvUin.setText("UIN: " + uin);
+                binding.tvUin.setText(uin);
             }
 
             boolean hasOpenid = account.getOpenid() != null && !account.getOpenid().isEmpty();

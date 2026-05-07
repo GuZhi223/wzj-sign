@@ -20,13 +20,13 @@
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="QQ号 (UIN)">
+            android:hint="备注">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_uin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number" />
+                android:inputType="text" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -35,13 +35,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:hint="OpenID (必填)">
+            android:hint="OpenID 或微助教网址">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_openid"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="text" />
+                android:inputType="textUri" />
 
         </com.google.android.material.textfield.TextInputLayout>
 

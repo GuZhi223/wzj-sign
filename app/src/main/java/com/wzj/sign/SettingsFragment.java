@@ -164,7 +164,6 @@ public class SettingsFragment extends Fragment {
             if (!isUpdatingSwitch) {
                 preferenceManager.setDaemonEnabled(isChecked);
                 notifyDaemonStatusChanged(isChecked);
-                updateServiceStatus();
             }
         });
 
@@ -207,10 +206,6 @@ public class SettingsFragment extends Fragment {
     private void updateServiceStatus() {
         boolean isRunning = serviceManager.isServiceRunning();
         binding.tvServiceStatus.setText(isRunning ? "运行中" : "未运行");
-
-        isUpdatingSwitch = true;
-        binding.switchService.setChecked(isRunning);
-        isUpdatingSwitch = false;
     }
 
     private void exportData() {
