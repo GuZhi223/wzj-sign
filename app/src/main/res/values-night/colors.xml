@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- MD3 Primary (Dark) -->
+    <color name="md_theme_primary">#FFD0BCFF</color>
+    <color name="md_theme_onPrimary">#FF381E72</color>
+    <color name="md_theme_primaryContainer">#FF4F378B</color>
+    <color name="md_theme_onPrimaryContainer">#FFEADDFF</color>
+
+    <!-- MD3 Secondary (Dark) -->
+    <color name="md_theme_secondary">#FFCCC2DC</color>
+    <color name="md_theme_onSecondary">#FF332D41</color>
+    <color name="md_theme_secondaryContainer">#FF4A4458</color>
+    <color name="md_theme_onSecondaryContainer">#FFE8DEF8</color>
+
+    <!-- MD3 Tertiary (Dark) -->
+    <color name="md_theme_tertiary">#FFEFB8C8</color>
+    <color name="md_theme_onTertiary">#FF492532</color>
+    <color name="md_theme_tertiaryContainer">#FF633B48</color>
+    <color name="md_theme_onTertiaryContainer">#FFFFD8E4</color>
+
+    <!-- MD3 Error (Dark) -->
+    <color name="md_theme_error">#FFF2B8B5</color>
+    <color name="md_theme_onError">#FF601410</color>
+    <color name="md_theme_errorContainer">#FF8C1D18</color>
+    <color name="md_theme_onErrorContainer">#FFF9DEDC</color>
+
+    <!-- MD3 Surface (Dark) -->
+    <color name="md_theme_background">#FF1C1B1F</color>
+    <color name="md_theme_onBackground">#FFE6E1E5</color>
+    <color name="md_theme_surface">#FF1C1B1F</color>
+    <color name="md_theme_onSurface">#FFE6E1E5</color>
+    <color name="md_theme_surfaceVariant">#FF49454F</color>
+    <color name="md_theme_onSurfaceVariant">#FFCAC4D0</color>
+
+    <!-- MD3 Surface Container (Dark) -->
+    <color name="md_theme_surfaceContainerLowest">#FF0F0D13</color>
+    <color name="md_theme_surfaceContainerLow">#FF211F26</color>
+    <color name="md_theme_surfaceContainer">#FF2B2930</color>
+    <color name="md_theme_surfaceContainerHigh">#FF36343B</color>
+    <color name="md_theme_surfaceContainerHighest">#FF484649</color>
+
+    <!-- MD3 Outline (Dark) -->
+    <color name="md_theme_outline">#FF938F99</color>
+    <color name="md_theme_outlineVariant">#FF49454F</color>
+
+    <!-- MD3 Inverse (Dark) -->
+    <color name="md_theme_inverseSurface">#FFE6E1E5</color>
+    <color name="md_theme_inverseOnSurface">#FF313033</color>
+    <color name="md_theme_inversePrimary">#FF6750A4</color>
+
+    <!-- MD3 Surface Tint (Dark) -->
+    <color name="md_theme_surfaceTint">#FFD0BCFF</color>
+
+    <!-- Status Colors (Dark) -->
+    <color name="status_success">#FF81C784</color>
+    <color name="status_error">#FFEF9A9A</color>
+    <color name="status_warning">#FFFFD54F</color>
+
+    <!-- Log Colors (Dark) -->
+    <color name="log_background">#FF4A4458</color>
+    <color name="log_text">#FFCAC4D0</color>
+</resources>

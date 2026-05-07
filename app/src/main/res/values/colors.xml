@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- MD3 Primary -->
+    <color name="md_theme_primary">#FF6750A4</color>
+    <color name="md_theme_onPrimary">#FFFFFFFF</color>
+    <color name="md_theme_primaryContainer">#FFEADDFF</color>
+    <color name="md_theme_onPrimaryContainer">#FF21005D</color>
+
+    <!-- MD3 Secondary -->
+    <color name="md_theme_secondary">#FF625B71</color>
+    <color name="md_theme_onSecondary">#FFFFFFFF</color>
+    <color name="md_theme_secondaryContainer">#FFE8DEF8</color>
+    <color name="md_theme_onSecondaryContainer">#FF1D192B</color>
+
+    <!-- MD3 Tertiary -->
+    <color name="md_theme_tertiary">#FF7D5260</color>
+    <color name="md_theme_onTertiary">#FFFFFFFF</color>
+    <color name="md_theme_tertiaryContainer">#FFFFD8E4</color>
+    <color name="md_theme_onTertiaryContainer">#FF31111D</color>
+
+    <!-- MD3 Error -->
+    <color name="md_theme_error">#FFB3261E</color>
+    <color name="md_theme_onError">#FFFFFFFF</color>
+    <color name="md_theme_errorContainer">#FFF9DEDC</color>
+    <color name="md_theme_onErrorContainer">#FF410E0B</color>
+
+    <!-- MD3 Surface -->
+    <color name="md_theme_background">#FFFDFBFF</color>
+    <color name="md_theme_onBackground">#FF1C1B1F</color>
+    <color name="md_theme_surface">#FFFDFBFF</color>
+    <color name="md_theme_onSurface">#FF1C1B1F</color>
+    <color name="md_theme_surfaceVariant">#FFE7E0EC</color>
+    <color name="md_theme_onSurfaceVariant">#FF49454F</color>
+
+    <!-- MD3 Surface Container -->
+    <color name="md_theme_surfaceContainerLowest">#FFFFFFFF</color>
+    <color name="md_theme_surfaceContainerLow">#FFF7F2FA</color>
+    <color name="md_theme_surfaceContainer">#FFF3EDF7</color>
+    <color name="md_theme_surfaceContainerHigh">#FFECDFE6</color>
+    <color name="md_theme_surfaceContainerHighest">#FFE6E0E9</color>
+
+    <!-- MD3 Outline -->
+    <color name="md_theme_outline">#FF79747E</color>
+    <color name="md_theme_outlineVariant">#FFCAC4D0</color>
+
+    <!-- MD3 Inverse -->
+    <color name="md_theme_inverseSurface">#FF313033</color>
+    <color name="md_theme_inverseOnSurface">#FFF4EFF4</color>
+    <color name="md_theme_inversePrimary">#FFD0BCFF</color>
+
+    <!-- MD3 Surface Tint -->
+    <color name="md_theme_surfaceTint">#FF6750A4</color>
+
+    <!-- Status Colors -->
+    <color name="status_success">#FF4CAF50</color>
+    <color name="status_error">#FFF44336</color>
+    <color name="status_warning">#FFFFC107</color>
+
+    <!-- Log Colors -->
+    <color name="log_background">#FFE8DEF8</color>
+    <color name="log_text">#FF49454F</color>
+
+    <!-- Convenience Aliases -->
+    <color name="primary">@color/md_theme_primary</color>
+    <color name="on_background">@color/md_theme_onBackground</color>
+    <color name="surface_variant">@color/md_theme_surfaceVariant</color>
+    <color name="on_surface_variant">@color/md_theme_onSurfaceVariant</color>
+    <color name="outline">@color/md_theme_outline</color>
+    <color name="error">@color/md_theme_error</color>
+
+    <!-- Launcher -->
+    <color name="ic_launcher_background">#FF6750A4</color>
+</resources>
