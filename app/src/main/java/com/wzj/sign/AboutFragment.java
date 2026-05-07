@@ -17,7 +17,7 @@ import com.wzj.sign.databinding.FragmentAboutBinding;
 
 public class AboutFragment extends Fragment {
 
-    private static final String GITHUB_URL = "https://github.com/AiJiale957/wzj-sign";
+    private static final String GITHUB_URL = "https://github.com/GuZhi223/wzj-sign";
 
     private FragmentAboutBinding binding;
 

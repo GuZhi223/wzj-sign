@@ -114,7 +114,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:text="GitHub"
-            app:icon="@drawable/ic_export" />
+            app:icon="@drawable/ic_github" />
 
     </LinearLayout>
 
