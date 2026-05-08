@@ -25,25 +25,25 @@
 - **签到通知**：签到成功后通过系统通知提醒
 - **签到日志**：实时记录签到过程，方便排查问题
 - **数据备份与恢复**：支持将账号数据导出为 JSON 文件，也可从备份文件导入
-- **Material Design 3**：采用 Material Design 3 设计语言，支持日间/夜间主题
+- **MIUI 风格界面**：采用 [Miuix](https://github.com/compose-miuix-ui/miuix) Compose UI 库，MIUI/HyperOS 设计风格，支持深色模式
 
 ## 技术栈
 
 | 类别 | 技术 |
 |---|---|
-| 语言 | Java |
+| 语言 | Kotlin + Java (业务逻辑层) |
 | 最低版本 | Android 7.0 (API 24) |
+| UI 框架 | Jetpack Compose + [Miuix](https://github.com/compose-miuix-ui/miuix) |
 | 网络请求 | Retrofit2 + OkHttp3 |
 | 数据解析 | Gson |
 | 本地存储 | Room 数据库 + SharedPreferences |
-| UI 框架 | Material Design 3 + ViewBinding |
 | 后台服务 | 前台服务 (Foreground Service) + WakeLock |
 
 ## 运行前准备
 
-- Android Studio Hedgehog (2023.1.1) 或更高版本
-- JDK 8+
-- Android SDK 36
+- Android Studio Ladybug (2024.2) 或更高版本
+- JDK 17+
+- Android SDK 37
 - 一台 Android 7.0+ 的设备或模拟器
 
 ## 快速开始
@@ -87,7 +87,7 @@ OpenID 是调用微助教 API 的必要凭证，有两种获取方式：
 ### 添加账号
 
 1. 打开应用，进入"签到"页面
-2. 点击"添加账号"按钮
+2. 点击"添加"按钮
 3. 输入备注（用于标识账号）和 OpenID
 4. OpenID 支持直接粘贴完整网址，应用会自动提取其中的 OpenID
 5. 点击保存
@@ -105,9 +105,15 @@ OpenID 是调用微助教 API 的必要凭证，有两种获取方式：
 ### 开始自动签到
 
 1. 在"签到"页面确认账号已添加
-2. 点击"开始签到"按钮
-3. 应用将启动前台服务，持续监控签到任务
+2. 点击右下角的播放按钮
+3. 应用将持续监控签到任务
 4. 签到成功后会收到系统通知
+
+### 后台守护
+
+1. 进入"设置"页面
+2. 开启"后台守护"开关
+3. 应用将以前台服务形式运行，即使关闭应用界面也能持续监控签到
 
 ### 查看日志
 
@@ -130,7 +136,7 @@ OpenID 是调用微助教 API 的必要凭证，有两种获取方式：
 
 ```
 app/src/main/java/com/wzj/sign/
-├── data/                          # 数据层
+├── data/                          # 数据层 (Java)
 │   ├── dao/AccountDao.java        # Room DAO
 │   ├── entity/AccountEntity.java  # 数据库实体
 │   ├── AccountRepository.java     # 数据仓库
@@ -138,27 +144,33 @@ app/src/main/java/com/wzj/sign/
 │   ├── BackupManager.java         # 数据备份管理
 │   ├── DataConverter.java         # 数据转换工具
 │   └── PreferenceManager.java     # 偏好设置管理
-├── log/                           # 日志模块
+├── log/                           # 日志模块 (Java)
 │   ├── LogEntry.java              # 日志条目
 │   └── SignLogger.java            # 日志记录器
-├── network/                       # 网络层
+├── network/                       # 网络层 (Java)
 │   ├── model/                     # 请求/响应模型
 │   ├── NetworkUtils.java          # 网络工具
 │   ├── RetrofitClient.java        # Retrofit 客户端
 │   ├── SignRepository.java        # 签到业务仓库
 │   └── TeachermateApi.java        # API 接口定义
-├── service/                       # 后台服务
+├── service/                       # 后台服务 (Java)
 │   ├── NotificationHelper.java    # 通知管理
 │   ├── ServiceManager.java        # 服务管理
 │   └── SignForegroundService.java # 前台签到服务
-├── MainActivity.java              # 主 Activity
-├── HomeFragment.java              # 首页（签到管理）
-├── LogFragment.java               # 日志页面
-├── SettingsFragment.java          # 设置页面
-├── AboutFragment.java             # 关于页面
+├── ui/                            # UI 层 (Kotlin + Compose)
+│   ├── home/
+│   │   ├── HomeScreen.kt          # 首页（签到管理）
+│   │   └── AccountCard.kt         # 账号卡片组件
+│   ├── log/
+│   │   └── LogScreen.kt           # 日志页面
+│   ├── settings/
+│   │   └── SettingsScreen.kt      # 设置页面
+│   ├── about/
+│   │   └── AboutScreen.kt         # 关于页面
+│   └── components/
+│       └── AccountBottomSheet.kt  # 账号编辑弹窗
+├── MainActivity.kt                # 入口 Activity + 状态管理
 ├── Account.java                   # 账号模型
-├── AccountAdapter.java            # 账号列表适配器
-├── AccountBottomSheet.java        # 账号编辑底部弹窗
 └── MyApplication.java             # Application
 ```
 
@@ -186,6 +198,7 @@ OpenID 有时效性，过期后签到会失败。请重新抓包获取新的 Ope
 - [zn-cn/wzj-sign-in-weixin](https://github.com/zn-cn/wzj-sign-in-weixin) - Golang + 微信公众号版本，通过微信公众号交互实现自动签到
 - [IntZhx/wzj_signin](https://github.com/IntZhx/wzj_signin) - Go + Web 页面版本，通过浏览器管理签到任务
 - [Azuka753/wzj_sign_public](https://github.com/Azuka753/wzj_sign_public) - 上游项目
+- [compose-miuix-ui/miuix](https://github.com/compose-miuix-ui/miuix) - MIUI/HyperOS 风格的 Compose UI 库
 
 ## 开源协议
 
