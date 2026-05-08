@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        compileSdk = 36
+        compileSdk = 37
         minSdk = 24
         targetSdk = 33
         appVersionCode = 1
@@ -9,5 +9,8 @@ buildscript {
 }
 
 plugins {
-    id 'com.android.application' version '8.2.0' apply false
+    id 'com.android.application' version '8.9.1' apply false
+    id 'org.jetbrains.kotlin.android' version '2.3.21' apply false
+    id 'org.jetbrains.kotlin.kapt' version '2.3.21' apply false
+    id 'org.jetbrains.kotlin.plugin.compose' version '2.3.21' apply false
 }

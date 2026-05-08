@@ -2,6 +2,7 @@
 .gradle
 /local.properties
 /.idea
+.claude/
 .DS_Store
 /build
 /captures
@@ -14,10 +15,6 @@ local.properties
 *.aab
 *.jks
 *.keystore
-.trae/
 *.log
 *.tmp
 *.bak
-gemini-code-*.java
-gradle.properties
-!gradle.properties.example

@@ -1,5 +1,7 @@
 package com.wzj.sign;
 
+import java.util.Objects;
+
 public class Account {
     private String uin;
     private String openid;
@@ -43,6 +45,22 @@ public class Account {
 
     public void setLatitude(String latitude) {
         this.latitude = latitude;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Account account = (Account) o;
+        return Objects.equals(uin, account.uin)
+                && Objects.equals(openid, account.openid)
+                && Objects.equals(longitude, account.longitude)
+                && Objects.equals(latitude, account.latitude);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uin, openid, longitude, latitude);
     }
 
     public String toConfigString() {

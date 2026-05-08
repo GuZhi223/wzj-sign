@@ -87,6 +87,16 @@ public class AccountRepository {
         });
     }
 
+    public void replaceAll(List<AccountEntity> accounts, Callback<Void> callback) {
+        executor.execute(() -> {
+            accountDao.deleteAll();
+            if (!accounts.isEmpty()) {
+                accountDao.insertAll(accounts);
+            }
+            mainHandler.post(() -> callback.onResult(null));
+        });
+    }
+
     public void shutdown() {
         executor.shutdownNow();
     }

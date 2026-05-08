@@ -1,6 +1,5 @@
 package com.wzj.sign.service;
 
-import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -8,18 +7,18 @@ import android.os.IBinder;
 import android.os.PowerManager;
 
 import com.wzj.sign.data.AppDatabase;
-import com.wzj.sign.data.DataConverter;
+import com.wzj.sign.data.PreferenceManager;
 import com.wzj.sign.data.dao.AccountDao;
 import com.wzj.sign.data.entity.AccountEntity;
 import com.wzj.sign.log.SignLogger;
+import com.wzj.sign.network.NetworkUtils;
 import com.wzj.sign.network.SignRepository;
 import com.wzj.sign.network.model.ActiveSignResponse;
 import com.wzj.sign.network.model.SignResponse;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SignForegroundService extends Service {
 
@@ -27,15 +26,17 @@ public class SignForegroundService extends Service {
     public static final String ACTION_STOP = "com.wzj.sign.ACTION_STOP";
     private static final String TAG = "SignService";
     private static final long POLL_INTERVAL_MS = 5000;
+    private static final long WAKELOCK_TIMEOUT_MS = 60 * 60 * 1000L;
 
     private NotificationHelper notificationHelper;
     private SignRepository signRepository;
     private SignLogger logger;
     private AccountDao accountDao;
-    private ExecutorService executorService;
+    private PreferenceManager preferenceManager;
     private PowerManager.WakeLock wakeLock;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private Thread pollThread;
+    private int lastAccountCount = -1;
 
     private final IBinder binder = new LocalBinder();
 
@@ -53,7 +54,7 @@ public class SignForegroundService extends Service {
         signRepository = new SignRepository();
         logger = SignLogger.getInstance(this);
         accountDao = AppDatabase.getInstance(this).accountDao();
-        executorService = Executors.newFixedThreadPool(3);
+        preferenceManager = new PreferenceManager(this);
     }
 
     @Override
@@ -75,22 +76,38 @@ public class SignForegroundService extends Service {
 
     private void startPolling() {
         isRunning.set(true);
+        lastAccountCount = -1;
         logger.info(TAG, "后台轮询守护进程已启动 (周期: 5s)");
 
         pollThread = new Thread(() -> {
             while (isRunning.get()) {
                 try {
+                    if (!NetworkUtils.isNetworkAvailable(SignForegroundService.this)) {
+                        logger.warn(TAG, "网络不可用，等待中...");
+                        Thread.sleep(POLL_INTERVAL_MS);
+                        continue;
+                    }
+
                     List<AccountEntity> accounts = accountDao.getAll();
                     if (accounts.isEmpty()) {
-                        logger.warn(TAG, "未配置任何账号");
+                        if (lastAccountCount != 0) {
+                            logger.warn(TAG, "未配置任何账号");
+                            notificationHelper.showServiceNotification("未配置账号，请先添加");
+                            lastAccountCount = 0;
+                        }
                     } else {
-                        notificationHelper.showServiceNotification(
-                                "正在监控 " + accounts.size() + " 个账号...");
+                        if (accounts.size() != lastAccountCount) {
+                            notificationHelper.showServiceNotification(
+                                    "正在监控 " + accounts.size() + " 个账号...");
+                            lastAccountCount = accounts.size();
+                        }
                         for (AccountEntity account : accounts) {
                             if (!isRunning.get()) break;
                             checkAndSign(account);
                         }
                     }
+
+                    renewWakeLock();
                     Thread.sleep(POLL_INTERVAL_MS);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -108,6 +125,10 @@ public class SignForegroundService extends Service {
         String openid = account.getOpenid();
         if (openid == null || openid.isEmpty()) return;
 
+        boolean gpsEnabled = preferenceManager.isGpsEnabled();
+        String defaultLon = preferenceManager.getDefaultLongitude();
+        String defaultLat = preferenceManager.getDefaultLatitude();
+
         signRepository.getActiveSigns(openid, new SignRepository.ResultCallback<List<ActiveSignResponse>>() {
             @Override
             public void onSuccess(List<ActiveSignResponse> data) {
@@ -116,9 +137,12 @@ public class SignForegroundService extends Service {
                 String signType = sign.getSignTypeName();
                 logger.info(TAG, "[" + account.getUin() + "] 发现签到任务: " + signType + " Course=" + sign.getCourseId());
 
-                boolean enableGps = sign.requiresGps();
+                boolean useGps = gpsEnabled && sign.requiresGps();
+                String lon = useGps ? (defaultLon.isEmpty() ? account.getLongitude() : defaultLon) : "";
+                String lat = useGps ? (defaultLat.isEmpty() ? account.getLatitude() : defaultLat) : "";
+
                 signRepository.submitSign(openid, sign.getCourseId(), sign.getSignId(),
-                        enableGps, account.getLongitude(), account.getLatitude(),
+                        useGps, lon, lat,
                         new SignRepository.ResultCallback<SignResponse>() {
                             @Override
                             public void onSuccess(SignResponse response) {
@@ -158,7 +182,13 @@ public class SignForegroundService extends Service {
         PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
         if (pm != null) {
             wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "wzj:sign_wakelock");
-            wakeLock.acquire(60 * 60 * 1000L);
+            wakeLock.acquire(WAKELOCK_TIMEOUT_MS);
+        }
+    }
+
+    private void renewWakeLock() {
+        if (wakeLock != null && !wakeLock.isHeld()) {
+            wakeLock.acquire(WAKELOCK_TIMEOUT_MS);
         }
     }
 
@@ -180,9 +210,6 @@ public class SignForegroundService extends Service {
     @Override
     public void onDestroy() {
         stopPolling();
-        if (executorService != null) {
-            executorService.shutdownNow();
-        }
         notificationHelper.cancelServiceNotification();
         super.onDestroy();
     }
