@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,17 +38,13 @@ fun AccountBottomSheet(
         Card(
             cornerRadius = 28.dp
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp)
-            ) {
+            Column(modifier = Modifier.fillMaxWidth().padding(22.dp)) {
                 Text(
                     text = if (editAccount != null) "编辑账号" else "添加账号",
-                    style = MiuixTheme.textStyles.title2,
+                    style = MiuixTheme.textStyles.title3,
                     color = MiuixTheme.colorScheme.onSurface
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
                 TextField(
                     value = uin,
                     onValueChange = { uin = it },
@@ -63,7 +58,7 @@ fun AccountBottomSheet(
                     label = "OpenID 或链接",
                     singleLine = true
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
                 Row(modifier = Modifier.fillMaxWidth()) {
                     TextButton(
                         text = "取消",

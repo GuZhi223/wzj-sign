@@ -1,9 +1,10 @@
 package com.wzj.sign.ui.log
 
 import android.widget.Toast
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,24 +16,21 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.wzj.sign.log.LogEntry
 import com.wzj.sign.log.SignLogger
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -41,8 +39,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 fun LogScreen(logger: SignLogger) {
     val context = LocalContext.current
     val logEntries = remember { mutableStateListOf<LogEntry>() }
-    val listState = rememberLazyListState()
-    var isAtBottom by remember { mutableStateOf(true) }
 
     DisposableEffect(logger) {
         val listener = object : SignLogger.OnLogListener {
@@ -50,69 +46,63 @@ fun LogScreen(logger: SignLogger) {
                 logEntries.add(entry)
             }
         }
+        logEntries.clear()
         logEntries.addAll(logger.entries)
         logger.addListener(listener)
         onDispose { logger.removeListener(listener) }
     }
 
-    LaunchedEffect(logEntries.size) {
-        if (isAtBottom && logEntries.isNotEmpty()) {
-            listState.animateScrollToItem(logEntries.size - 1)
-        }
-    }
-
-    LaunchedEffect(listState) {
-        snapshotFlow {
-            val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-            lastVisible == listState.layoutInfo.totalItemsCount - 1
-        }.collect { atBottom -> isAtBottom = atBottom }
-    }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 72.dp)
-        ) {
-            items(logEntries, key = { "${it.timestamp}_${it.message}" }) { entry ->
-                LogItem(entry)
-                Spacer(modifier = Modifier.height(4.dp))
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        item {
+            Card(modifier = Modifier.fillMaxWidth(), insideMargin = PaddingValues(horizontal = 16.dp, vertical = 12.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("运行日志", style = MiuixTheme.textStyles.body1)
+                        Text(
+                            "${logEntries.size} 条记录",
+                            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                            style = MiuixTheme.textStyles.footnote1
+                        )
+                    }
+                    TextButton(
+                        text = "清空",
+                        onClick = {
+                            logger.clear()
+                            logEntries.clear()
+                        }
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextButton(
+                        text = "导出",
+                        onClick = {
+                            val path = logger.exportToFile()
+                            if (path != null) {
+                                Toast.makeText(context, "日志已导出: $path", Toast.LENGTH_LONG).show()
+                            } else {
+                                Toast.makeText(context, "日志导出失败", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    )
+                }
             }
         }
 
-        Card(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                TextButton(
-                    text = "清空日志",
-                    onClick = {
-                        logger.clear()
-                        logEntries.clear()
-                    },
-                    modifier = Modifier.weight(1f)
+        if (logEntries.isEmpty()) {
+            item {
+                Text(
+                    text = "暂无日志",
+                    modifier = Modifier.padding(16.dp),
+                    color = MiuixTheme.colorScheme.onBackgroundVariant
                 )
-                Spacer(modifier = Modifier.width(16.dp))
-                TextButton(
-                    text = "导出日志",
-                    onClick = {
-                        val path = logger.exportToFile()
-                        if (path != null) {
-                            Toast.makeText(context, "日志已导出: $path", Toast.LENGTH_LONG).show()
-                        } else {
-                            Toast.makeText(context, "日志导出失败", Toast.LENGTH_SHORT).show()
-                        }
-                    },
-                    modifier = Modifier.weight(1f)
-                )
+            }
+        } else {
+            item { SmallTitle(text = "最近") }
+            items(logEntries.asReversed(), key = { "${it.timestamp}_${it.message}" }) { entry ->
+                LogItem(entry)
             }
         }
     }
@@ -120,30 +110,39 @@ fun LogScreen(logger: SignLogger) {
 
 @Composable
 private fun LogItem(entry: LogEntry) {
+    val color = when (entry.level) {
+        LogEntry.Level.ERROR -> MiuixTheme.colorScheme.error
+        LogEntry.Level.WARNING -> MiuixTheme.colorScheme.primaryVariant
+        LogEntry.Level.INFO -> MiuixTheme.colorScheme.primary
+        LogEntry.Level.DEBUG -> MiuixTheme.colorScheme.onSurfaceVariantSummary
+    }
+
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp, vertical = 7.dp),
+        verticalAlignment = Alignment.Top
     ) {
-        val color = when (entry.level) {
-            LogEntry.Level.WARNING -> Color(0xFFFFC107)
-            LogEntry.Level.ERROR -> Color(0xFFF44336)
-            else -> Color(0xFF4CAF50)
-        }
-        Canvas(modifier = Modifier.size(8.dp)) {
-            drawCircle(color = color)
-        }
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = entry.formattedTime,
-            style = MiuixTheme.textStyles.main,
-            color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+        Box(
+            modifier = Modifier
+                .padding(top = 7.dp)
+                .size(7.dp)
+                .background(color, CircleShape)
         )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = entry.message,
-            style = MiuixTheme.textStyles.main,
-            color = MiuixTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f)
-        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = entry.message,
+                style = MiuixTheme.textStyles.paragraph,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = "${entry.formattedTime}  ${entry.levelTag}",
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                style = MiuixTheme.textStyles.footnote1
+            )
+        }
     }
 }

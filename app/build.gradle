@@ -58,6 +58,7 @@ dependencies {
 
     // Miuix (MIUI/HyperOS style Compose UI)
     implementation 'top.yukonga.miuix.kmp:miuix-ui-android:0.9.0'
+    implementation 'top.yukonga.miuix.kmp:miuix-preference-android:0.9.0'
 
     // Networking
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
