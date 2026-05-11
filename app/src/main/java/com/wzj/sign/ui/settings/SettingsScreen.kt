@@ -3,6 +3,9 @@ package com.wzj.sign.ui.settings
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -13,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -22,9 +26,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.wzj.sign.data.AccountRepository
 import com.wzj.sign.data.BackupManager
 import com.wzj.sign.data.PreferenceManager
@@ -33,11 +43,9 @@ import com.wzj.sign.service.ServiceManager
 import kotlinx.coroutines.flow.debounce
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.preference.SwitchPreference
 
 @Composable
 fun SettingsScreen(
@@ -100,23 +108,27 @@ fun SettingsScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         SettingsGroup(title = "签到参数") {
-            TextField(
+            SettingsInputRow(
+                title = "签到次数",
+                summary = "每个账号最多扫描次数",
                 value = signCountText,
                 onValueChange = { signCountText = it.filter(Char::isDigit) },
-                label = "签到次数",
-                singleLine = true
+                suffix = "次",
+                keyboardType = KeyboardType.Number
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            TextField(
+            Spacer(modifier = Modifier.height(6.dp))
+            SettingsInputRow(
+                title = "间隔时间",
+                summary = "两次扫描之间的等待",
                 value = intervalText,
                 onValueChange = { intervalText = it.filter(Char::isDigit) },
-                label = "间隔时间(ms)",
-                singleLine = true
+                suffix = "ms",
+                keyboardType = KeyboardType.Number
             )
         }
 
         SettingsGroup(title = "模拟定位") {
-            SwitchPreference(
+            SettingsSwitchRow(
                 title = "启用坐标",
                 summary = "签到时使用自定义经纬度",
                 checked = gpsEnabled,
@@ -128,29 +140,31 @@ fun SettingsScreen(
             )
             AnimatedVisibility(visible = gpsEnabled) {
                 Column {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    TextField(
+                    Spacer(modifier = Modifier.height(6.dp))
+                    SettingsInputRow(
+                        title = "经度",
+                        summary = "默认经度",
                         value = longitudeText,
                         onValueChange = { longitudeText = it },
-                        label = "经度",
-                        singleLine = true
+                        keyboardType = KeyboardType.Decimal
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    TextField(
+                    Spacer(modifier = Modifier.height(6.dp))
+                    SettingsInputRow(
+                        title = "纬度",
+                        summary = "默认纬度",
                         value = latitudeText,
                         onValueChange = { latitudeText = it },
-                        label = "纬度",
-                        singleLine = true
+                        keyboardType = KeyboardType.Decimal
                     )
                 }
             }
         }
 
         SettingsGroup(title = "后台守护") {
-            SwitchPreference(
+            SettingsSwitchRow(
                 title = "前台服务",
                 summary = if (serviceRunning) "运行中" else "未运行",
-                checked = daemonEnabled,
+                checked = serviceRunning,
                 onCheckedChange = {
                     daemonEnabled = it
                     preferenceManager.isDaemonEnabled = it
@@ -227,6 +241,62 @@ fun SettingsScreen(
 }
 
 @Composable
+private fun SettingsInputRow(
+    title: String,
+    summary: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    suffix: String = "",
+    keyboardType: KeyboardType = KeyboardType.Text
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 2.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                color = MiuixTheme.colorScheme.onSurface,
+                fontSize = 17.sp
+            )
+            Text(
+                text = summary,
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                fontSize = 13.sp
+            )
+        }
+        Row(
+            modifier = Modifier
+                .background(MiuixTheme.colorScheme.surface, RoundedCornerShape(18.dp))
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                modifier = Modifier.width(82.dp),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+                textStyle = TextStyle(
+                    color = MiuixTheme.colorScheme.onSurface,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.End
+                )
+            )
+            if (suffix.isNotEmpty()) {
+                Text(
+                    text = " $suffix",
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                    fontSize = 13.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun CompactDataAction(
     text: String,
     modifier: Modifier = Modifier,
@@ -236,10 +306,49 @@ private fun CompactDataAction(
         modifier = modifier.clickable(onClick = onClick),
         insideMargin = PaddingValues(horizontal = 12.dp, vertical = 10.dp)
     ) {
-        Text(
-            text = text,
-            color = MiuixTheme.colorScheme.primary,
-            style = MiuixTheme.textStyles.paragraph
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = text,
+                color = MiuixTheme.colorScheme.primary,
+                fontSize = 16.sp
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingsSwitchRow(
+    title: String,
+    summary: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onCheckedChange(!checked) }
+            .padding(horizontal = 2.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                color = MiuixTheme.colorScheme.onSurface,
+                fontSize = 17.sp
+            )
+            Text(
+                text = summary,
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                fontSize = 14.sp
+            )
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange
         )
     }
 }
