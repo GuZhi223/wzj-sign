@@ -1,6 +1,7 @@
 package com.wzj.sign.ui.settings
 
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,8 +33,10 @@ import com.wzj.sign.service.ServiceManager
 import kotlinx.coroutines.flow.debounce
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.SmallTitle
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 
 @Composable
@@ -90,6 +95,7 @@ fun SettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -162,7 +168,7 @@ fun SettingsScreen(
 
         SettingsGroup(title = "数据管理") {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                TextButton(
+                CompactDataAction(
                     text = "导出数据",
                     onClick = {
                         accountRepository.getAll { accounts ->
@@ -181,19 +187,19 @@ fun SettingsScreen(
                     },
                     modifier = Modifier.weight(1f)
                 )
-                TextButton(
+                CompactDataAction(
                     text = "导入数据",
                     onClick = {
                         val backupFiles = backupManager.backupFiles
                         if (backupFiles.isNullOrEmpty()) {
                             Toast.makeText(context, "没有找到备份文件", Toast.LENGTH_SHORT).show()
-                            return@TextButton
+                            return@CompactDataAction
                         }
                         val latest = backupFiles.last()
                         val accounts = backupManager.importAccounts(latest)
                         if (accounts == null) {
                             Toast.makeText(context, "导入失败: 无法读取备份文件", Toast.LENGTH_SHORT).show()
-                            return@TextButton
+                            return@CompactDataAction
                         }
                         accountRepository.deleteAll {
                             if (accounts.isEmpty()) {
@@ -221,11 +227,29 @@ fun SettingsScreen(
 }
 
 @Composable
+private fun CompactDataAction(
+    text: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = modifier.clickable(onClick = onClick),
+        insideMargin = PaddingValues(horizontal = 12.dp, vertical = 10.dp)
+    ) {
+        Text(
+            text = text,
+            color = MiuixTheme.colorScheme.primary,
+            style = MiuixTheme.textStyles.paragraph
+        )
+    }
+}
+
+@Composable
 private fun SettingsGroup(title: String, content: @Composable ColumnScope.() -> Unit) {
     Column {
         SmallTitle(text = title)
         Card(modifier = Modifier.fillMaxWidth(), insideMargin = PaddingValues(0.dp)) {
-            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp), content = content)
+            Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp), content = content)
         }
     }
 }

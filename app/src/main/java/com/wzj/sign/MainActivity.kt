@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,10 +24,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Density
 import com.wzj.sign.data.AccountRepository
 import com.wzj.sign.data.BackupManager
 import com.wzj.sign.data.DataConverter
@@ -44,7 +47,6 @@ import com.wzj.sign.ui.home.HomeScreen
 import com.wzj.sign.ui.log.LogScreen
 import com.wzj.sign.ui.settings.SettingsScreen
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
@@ -70,7 +72,12 @@ class MainActivity : ComponentActivity() {
                 )
             }
             MiuixTheme(controller = themeController) {
-                App()
+                val density = LocalDensity.current
+                CompositionLocalProvider(
+                    LocalDensity provides Density(density.density, fontScale = 1f)
+                ) {
+                    App()
+                }
             }
         }
     }
@@ -276,18 +283,6 @@ private fun App() {
                 }
             }
         },
-        floatingActionButton = {
-            if (currentPage == 0) {
-                FloatingActionButton(onClick = {
-                    if (isSignRunning) stopSign() else startSign()
-                }) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(if (isSignRunning) R.drawable.ic_stop else R.drawable.ic_play),
-                        contentDescription = if (isSignRunning) "停止签到" else "开始签到"
-                    )
-                }
-            }
-        }
     ) { padding ->
         HorizontalPager(
             state = pagerState,
@@ -298,6 +293,13 @@ private fun App() {
                     accounts = accounts,
                     isSignRunning = isSignRunning,
                     signStatusText = signStatusText,
+                    signCount = preferenceManager.signCount,
+                    signInterval = preferenceManager.signInterval,
+                    gpsEnabled = preferenceManager.isGpsEnabled,
+                    serviceRunning = serviceManager.isServiceRunning,
+                    logCount = logger.entries.size,
+                    onStartSign = { startSign() },
+                    onStopSign = { stopSign() },
                     onAddAccount = {
                         editingAccountIndex = -1
                         showAccountSheet = true
@@ -314,10 +316,6 @@ private fun App() {
                             logger.info("Home", "移除了账号: ${removed.uin}")
                         }
                     },
-                    onNavigateToSettings = {
-                        currentPage = 2
-                        coroutineScope.launch { pagerState.animateScrollToPage(2) }
-                    }
                 )
                 1 -> LogScreen(logger = logger)
                 2 -> SettingsScreen(

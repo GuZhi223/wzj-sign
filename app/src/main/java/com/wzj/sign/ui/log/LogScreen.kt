@@ -1,6 +1,7 @@
 package com.wzj.sign.ui.log
 
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,7 +33,6 @@ import com.wzj.sign.log.SignLogger
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -68,15 +68,14 @@ fun LogScreen(logger: SignLogger) {
                             style = MiuixTheme.textStyles.footnote1
                         )
                     }
-                    TextButton(
+                    CompactLogAction(
                         text = "清空",
                         onClick = {
                             logger.clear()
                             logEntries.clear()
                         }
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(
+                    CompactLogAction(
                         text = "导出",
                         onClick = {
                             val path = logger.exportToFile()
@@ -145,4 +144,16 @@ private fun LogItem(entry: LogEntry) {
             )
         }
     }
+}
+
+@Composable
+private fun CompactLogAction(text: String, onClick: () -> Unit) {
+    Text(
+        text = text,
+        modifier = Modifier
+            .clickable(onClick = onClick)
+            .padding(horizontal = 10.dp, vertical = 8.dp),
+        color = MiuixTheme.colorScheme.primary,
+        style = MiuixTheme.textStyles.paragraph
+    )
 }
